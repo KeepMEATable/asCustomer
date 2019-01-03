@@ -9,7 +9,16 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
+import Notification from '@/lib/Notifications';
 
-@Component
-export default class Waiting extends Vue {}
+@Component({
+  components: {
+    Notification,
+  },
+})
+export default class Waiting extends Vue {
+  public mounted() {
+    Notification();
+  }
+}
 </script>
