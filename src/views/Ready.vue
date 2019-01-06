@@ -18,7 +18,7 @@ import Notification from '@/lib/Notifications';
 })
 export default class Waiting extends Vue {
   public mounted() {
-    Notification();
+    Notification(this.$store.state.uid);
   }
 }
 </script>

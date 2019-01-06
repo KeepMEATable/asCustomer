@@ -2,12 +2,13 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import createPersistedState from 'vuex-persistedstate';
 import Router from './router';
+import UuidV4 from 'uuid/v4';
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    uid: 'A17CF9AD-C964-4CB5-90C2-2BED8F8BCE67',
+    uid: UuidV4(),
     started: false,
     waiting: false,
     ready: false,

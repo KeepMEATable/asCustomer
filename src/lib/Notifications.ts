@@ -1,10 +1,12 @@
-export default function() {
+/*tslint:disable:no-shadowed-variable no-console*/
+
+export default function(topic: string) {
     Notification.requestPermission().then(() => {
         if (Notification.permission === 'granted') {
 
             navigator.serviceWorker.getRegistration().then((reg) => {
-                const es = new EventSource('https://mercure.keepmeatable.dev/hub?topic=A17CF9AD-C964-4CB5-90C2-2BED8F8BCE67');
-                es.onmessage = e => {
+                const es = new EventSource(`https://mercure.keepmeatable.dev/hub?topic=${topic}`);
+                es.onmessage = (e) => {
                     console.log(e);
 
                     navigator.serviceWorker.getRegistration().then((reg) => {
@@ -19,7 +21,7 @@ export default function() {
 
                         reg.showNotification('Table\'s ready!', options);
                     });
-                }
+                };
             });
         }
     });
