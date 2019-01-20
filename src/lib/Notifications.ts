@@ -3,9 +3,12 @@
 export default function(topic: string) {
     Notification.requestPermission().then(() => {
         if (Notification.permission === 'granted') {
-
+            console.log('granted');
             navigator.serviceWorker.getRegistration().then((reg) => {
-                const es = new EventSource(`https://mercure.keepmeatable.dev/hub?topic=${topic}`);
+                console.log('es started with topic ', topic);
+                const baseUrl = 'https://mercure.keepmeatable.dev/hub?topic=';
+                const baseTopic = 'https://api.keepmeatable.dev:8443/queues/';
+                const es = new EventSource(`${baseUrl}${baseTopic}${topic}`);
                 es.onmessage = (e) => {
                     console.log(e);
 
