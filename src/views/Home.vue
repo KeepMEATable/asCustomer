@@ -62,7 +62,7 @@
           </div>
         </slide>
         <Slide>
-          <v-btn outline large fab color="indigo" v-on:click="$store.dispatch('start')">
+          <v-btn outline large fab color="indigo" v-on:click="$router.push({name: 'qrCode'})">
             Start
           </v-btn>
         </Slide>

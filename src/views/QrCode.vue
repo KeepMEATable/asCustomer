@@ -1,9 +1,6 @@
 <template>
   <div class="QrCode">
     <QrCode/>
-    <v-btn color="success" v-on:click="$store.dispatch('hasBeenFlashed')">
-       Flash!
-    </v-btn>
   </div>
 </template>
 
@@ -16,5 +13,9 @@ import QrCode from '@/components/QrCode.vue';
     QrCode,
   },
 })
-export default class Tag extends Vue {}
+export default class Tag extends Vue {
+  public mounted() {
+    this.$store.dispatch('start');
+  }
+}
 </script>

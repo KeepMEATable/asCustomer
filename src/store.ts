@@ -27,13 +27,55 @@ export default new Vuex.Store({
     setStarted(state) {
       state.started = true;
     },
+    synchronizeState(state, queue, reg) {
+      // table is ready
+      if (true === queue.started && false === queue.waiting && true === queue.ready) {
+        if (false === state.waiting && true ===  state.ready) {
+          Router.push({name: 'ready'});
+          return;
+        }
+
+        const options = {
+          body: 'You can go!',
+          vibrate: [5000, 1000, 5000, 1000, 5000],
+        };
+
+        Notification.requestPermission().then(() => {
+          if (Notification.permission !== 'granted') {
+            return;
+          }
+
+          navigator.serviceWorker.getRegistration().then((reg) => {
+            reg.showNotification('Table\'s ready!', options);
+          });
+        });
+
+        state.waiting = false;
+        state.ready = true;
+        Router.push({name: 'ready'});
+      }
+
+      // dismiss message // reset.
+      if (true === queue.started && false === queue.waiting && false === queue.ready) {
+        state.waiting = false;
+        state.ready = false;
+        Router.push({name: 'qrCode'});
+      }
+
+      // has been flashed
+      if (true === queue.started && true === queue.waiting && false === queue.ready) {
+        state.waiting = true;
+        state.ready = false;
+        Router.push({name: 'waiting'});
+      }
+    },
   },
   actions: {
     start({commit, state}) {
       Api
-        .head(`queues/${state.uid}`)
-        .then(() => {
-          Router.push({name: 'qrCode'});
+        .get(`queues/${state.uid}`)
+        .then(({data}) => {
+          commit('synchronizeState', data);
         })
         .catch((error: any) => {
           if (404 !== error.response.status) {
@@ -50,25 +92,36 @@ export default new Vuex.Store({
               Router.push({name: 'qrCode'});
             });
         });
+
+      Notification.requestPermission().then(() => {
+        if (Notification.permission !== 'granted') {
+          return;
+        }
+
+        navigator.serviceWorker.getRegistration().then((reg) => {
+          if (undefined === reg) { return; }
+
+          const baseUrl = 'https://mercure.keepmeatable.dev/hub?topic=';
+          const baseTopic = 'https://api.keepmeatable.dev:8443/queues/';
+          const es = new EventSource(`${baseUrl}${baseTopic}${state.uid}`);
+
+          es.onmessage = ({data}) => {
+            const queue = JSON.parse(data);
+            commit('synchronizeState', queue);
+          };
+        });
+      });
     },
-    hasBeenFlashed({commit}) {
-      commit('toggleWaiting', true);
-      commit('toggleReady', false);
-      Router.push({name: 'waiting'});
-    },
-    cancelFlash({commit}) {
-      commit('toggleWaiting', false);
-      Router.push({name: 'qrCode'});
-    },
-    tableIsReady({commit}) {
-      commit('toggleWaiting', false);
-      commit('toggleReady', true);
-      Router.push({name: 'ready'});
-    },
-    dismiss({commit}) {
-      commit('toggleWaiting', false);
-      commit('toggleReady', false);
-      Router.push({name: 'qrCode'});
+    reset({commit, state}) {
+      Api
+        .put(`queues/${state.uid}`, {
+          started: true,
+          waiting: false,
+          ready: false,
+        })
+        .then((response: Queue) => {
+          commit('synchronizeState', response);
+        });
     },
   },
   plugins: [
