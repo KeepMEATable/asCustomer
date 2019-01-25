@@ -1,8 +1,8 @@
 FROM node:11.5-alpine
 
-RUN mkdir -p /usr/src/asCustomer
+RUN mkdir -p /usr/src/ascustomer
 
-WORKDIR /usr/src/asCustomer
+WORKDIR /usr/src/ascustomer
 
 # Prevent the reinstallation of node modules at every changes in the source code
 COPY package.json yarn.lock ./
