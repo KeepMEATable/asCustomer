@@ -85,7 +85,6 @@ export default new Vuex.Store({
           Api
             .post(`queues`, {
               customerId: state.uid,
-              started: true,
             })
             .then((response: Queue) => {
               commit('setStarted');
@@ -101,8 +100,8 @@ export default new Vuex.Store({
         navigator.serviceWorker.getRegistration().then((reg) => {
           if (undefined === reg) { return; }
 
-          const baseUrl = 'https://mercure.keepmeatable.dev/hub?topic=';
-          const baseTopic = 'https://api.keepmeatable.dev:8443/queues/';
+          const baseUrl = `${process.env.VUE_APP_MERCURE_HUB_ENTRYPOINT}?topic=`;
+          const baseTopic = `${process.env.VUE_APP_API_ENTRYPOINT}/queues/`;
           const es = new EventSource(`${baseUrl}${baseTopic}${state.uid}`);
 
           es.onmessage = ({data}) => {
@@ -114,10 +113,8 @@ export default new Vuex.Store({
     },
     reset({commit, state}) {
       Api
-        .put(`queues/${state.uid}`, {
-          started: true,
-          waiting: false,
-          ready: false,
+        .patch(`queues/${state.uid}/state`, {
+          state: 'reset',
         })
         .then((response: Queue) => {
           commit('synchronizeState', response);

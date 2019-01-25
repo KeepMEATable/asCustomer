@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'https://api.keepmeatable.dev:8443/',
+    baseURL: `${process.env.VUE_APP_API_ENTRYPOINT}/`,
     timeout: 1000,
 });
 
