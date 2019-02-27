@@ -1,4 +1,4 @@
-export default interface Queue {
+export default interface WaitingLine {
     customerId: string;
     ready: boolean;
     started: boolean;

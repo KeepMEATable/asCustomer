@@ -5,7 +5,7 @@ import Vuex from 'vuex';
 import createPersistedState from 'vuex-persistedstate';
 import Router from './router';
 import UuidV4 from 'uuid/v4';
-import Queue from './models/queue';
+import WaitingLine from './models/WaitingLine';
 import Api from '@/lib/Api';
 
 Vue.use(Vuex);
@@ -27,9 +27,9 @@ export default new Vuex.Store({
     setStarted(state) {
       state.started = true;
     },
-    synchronizeState(state, queue, reg) {
+      synchronizeState(state, waitingLine, reg) {
       // table is ready
-      if (true === queue.started && false === queue.waiting && true === queue.ready) {
+      if (true === waitingLine.started && false === waitingLine.waiting && true === waitingLine.ready) {
         if (false === state.waiting && true ===  state.ready) {
           Router.push({name: 'ready'});
           return;
@@ -56,14 +56,14 @@ export default new Vuex.Store({
       }
 
       // dismiss message // reset.
-      if (true === queue.started && false === queue.waiting && false === queue.ready) {
+      if (true === waitingLine.started && false === waitingLine.waiting && false === waitingLine.ready) {
         state.waiting = false;
         state.ready = false;
         Router.push({name: 'qrCode'});
       }
 
       // has been flashed
-      if (true === queue.started && true === queue.waiting && false === queue.ready) {
+      if (true === waitingLine.started && true === waitingLine.waiting && false === waitingLine.ready) {
         state.waiting = true;
         state.ready = false;
         Router.push({name: 'waiting'});
@@ -73,7 +73,7 @@ export default new Vuex.Store({
   actions: {
     start({commit, state}) {
       Api
-        .get(`queues/${state.uid}`)
+        .get(`waiting_lines/${state.uid}`)
         .then(({data}) => {
           commit('synchronizeState', data);
         })
@@ -83,10 +83,10 @@ export default new Vuex.Store({
           }
 
           Api
-            .post(`queues`, {
+            .post(`waiting_lines`, {
               customerId: state.uid,
             })
-            .then((response: Queue) => {
+            .then((response: WaitingLine) => {
               commit('setStarted');
               Router.push({name: 'qrCode'});
             });
@@ -101,22 +101,22 @@ export default new Vuex.Store({
           if (undefined === reg) { return; }
 
           const baseUrl = `${process.env.VUE_APP_MERCURE_HUB_ENTRYPOINT}?topic=`;
-          const baseTopic = `${process.env.VUE_APP_API_ENTRYPOINT}/queues/`;
+          const baseTopic = `${process.env.VUE_APP_API_ENTRYPOINT}/waiting_lines/`;
           const es = new EventSource(`${baseUrl}${baseTopic}${state.uid}`);
 
           es.onmessage = ({data}) => {
-            const queue = JSON.parse(data);
-            commit('synchronizeState', queue);
+            const waitingLine = JSON.parse(data);
+            commit('synchronizeState', waitingLine);
           };
         });
       });
     },
     reset({commit, state}) {
       Api
-        .patch(`queues/${state.uid}/state`, {
+        .patch(`waiting_lines/${state.uid}/state`, {
           state: 'reset',
         })
-        .then((response: Queue) => {
+        .then((response: WaitingLine) => {
           commit('synchronizeState', response);
         });
     },
