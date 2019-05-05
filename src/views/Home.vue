@@ -62,7 +62,7 @@
           </div>
         </slide>
         <Slide>
-          <v-btn outline large fab color="indigo" v-on:click="$router.push({name: 'qrCode'})">
+          <v-btn outline large fab color="indigo" v-on:click="$store.dispatch('start')">
             Start
           </v-btn>
         </Slide>
@@ -83,5 +83,9 @@ import QrCode from '@/components/QrCode.vue';
     QrCode,
   },
 })
-export default class Home extends Vue {}
+export default class Home extends Vue {
+  public mounted() {
+    this.$store.dispatch('setFingerprint');
+  }
+}
 </script>

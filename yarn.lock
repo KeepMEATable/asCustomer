@@ -3942,6 +3942,11 @@ find-up@^3.0.0:
   dependencies:
     locate-path "^3.0.0"
 
+fingerprintjs2@^2.0.6:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/fingerprintjs2/-/fingerprintjs2-2.0.6.tgz#24b3ad6f541834833c44b5d81f27c5fd11144898"
+  integrity sha512-ga84FInnM1gPc39rA88SPyHVdeGOc2soRGhLJQFOxANkeD792M97maGHBK3b8zoVM5tPULS0NvSJ4DM7DXkviA==
+
 flush-write-stream@^1.0.0:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/flush-write-stream/-/flush-write-stream-1.0.3.tgz#c5d586ef38af6097650b49bc41b55fabb19f35bd"

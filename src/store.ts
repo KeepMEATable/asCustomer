@@ -7,17 +7,23 @@ import Router from './router';
 import UuidV4 from 'uuid/v4';
 import WaitingLine from './models/WaitingLine';
 import Api from '@/lib/Api';
+import Fingerprint2 from 'fingerprintjs2';
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    uid: UuidV4(),
+    uid: null,
     started: false,
     waiting: false,
     ready: false,
   },
   mutations: {
+    setFingerprint(state) {
+      Fingerprint2.get((components) => {
+        state.uid = Fingerprint2.x64hash128(components.map((pair) => pair.value).join(), 31);
+      });
+    },
     toggleWaiting(state, position: boolean) {
       state.waiting = position;
     },
@@ -27,7 +33,11 @@ export default new Vuex.Store({
     setStarted(state) {
       state.started = true;
     },
-      synchronizeState(state, waitingLine, reg) {
+    synchronizeState(state, waitingLine) {
+      state.started = waitingLine.started;
+      state.ready = waitingLine.ready;
+      state.waiting = waitingLine.waiting;
+
       // table is ready
       if (true === waitingLine.started && false === waitingLine.waiting && true === waitingLine.ready) {
         if (false === state.waiting && true ===  state.ready) {
@@ -71,6 +81,9 @@ export default new Vuex.Store({
     },
   },
   actions: {
+    setFingerprint({commit}) {
+      setTimeout(() => commit('setFingerprint'), 500);
+    },
     start({commit, state}) {
       Api
         .get(`waiting_lines/${state.uid}`)
@@ -93,23 +106,23 @@ export default new Vuex.Store({
         });
 
       Notification.requestPermission().then(() => {
-        if (Notification.permission !== 'granted') {
-          return;
-        }
+          if (Notification.permission !== 'granted') {
+            return;
+          }
 
-        navigator.serviceWorker.getRegistration().then((reg) => {
-          if (undefined === reg) { return; }
+          navigator.serviceWorker.getRegistration().then((reg) => {
+            if (undefined === reg) { return; }
 
-          const baseUrl = `${process.env.VUE_APP_MERCURE_HUB_ENTRYPOINT}?topic=`;
-          const baseTopic = `${process.env.VUE_APP_API_ENTRYPOINT}/waiting_lines/`;
-          const es = new EventSource(`${baseUrl}${baseTopic}${state.uid}`);
+            const baseUrl = `${process.env.VUE_APP_MERCURE_HUB_ENTRYPOINT}?topic=`;
+            const baseTopic = `${process.env.VUE_APP_API_ENTRYPOINT}/waiting_lines/`;
+            const es = new EventSource(`${baseUrl}${baseTopic}${state.uid}`);
 
-          es.onmessage = ({data}) => {
-            const waitingLine = JSON.parse(data);
-            commit('synchronizeState', waitingLine);
-          };
+            es.onmessage = ({data}) => {
+              const waitingLine = JSON.parse(data);
+              commit('synchronizeState', waitingLine);
+            };
+          });
         });
-      });
     },
     reset({commit, state}) {
       Api
