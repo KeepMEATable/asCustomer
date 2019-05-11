@@ -17,6 +17,8 @@ export default new Vuex.Store({
     started: false,
     waiting: false,
     ready: false,
+    awaitStartedAt: null,
+    estimatedDelay: null,
   },
   mutations: {
     setFingerprint(state) {
@@ -37,10 +39,12 @@ export default new Vuex.Store({
       state.started = waitingLine.started;
       state.ready = waitingLine.ready;
       state.waiting = waitingLine.waiting;
+      state.awaitStartedAt = waitingLine.awaitStartedAt !== null ? waitingLine.awaitStartedAt : 0;
+      state.estimatedDelay = waitingLine.holder !== null ? waitingLine.holder.estimatedDelay : 0;
 
       // table is ready
       if (true === waitingLine.started && false === waitingLine.waiting && true === waitingLine.ready) {
-        if (false === state.waiting && true ===  state.ready) {
+        if (false === state.waiting && true === state.ready) {
           Router.push({name: 'ready'});
           return;
         }

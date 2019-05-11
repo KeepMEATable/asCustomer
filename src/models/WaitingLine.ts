@@ -3,4 +3,8 @@ export default interface WaitingLine {
     ready: boolean;
     started: boolean;
     waiting: boolean;
+    awaitStartedAt: any;
+    holder: {
+        estimatedDelay: number,
+    };
 }
